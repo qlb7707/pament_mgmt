@@ -1,4 +1,4 @@
 report_log
 record_log
-myemail.pyc
+*.pyc
 test_email2.py

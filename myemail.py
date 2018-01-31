@@ -1,4 +1,5 @@
 #coding=utf-8
+import argparse
 import sys
 import smtplib
 from email.mime.text import MIMEText
@@ -58,4 +59,9 @@ def email_send(sub,con = 'None',attach='',name='attach'):
 	
 	
 if __name__ == '__main__':
-	email_send('test qlb','hello world', 'myemail.py','email.py')	
+	parser = argparse.ArgumentParser("manual to the script")
+	parser.add_argument("--header",type=str,default='empty header')
+	parser.add_argument("--content",type=str,default="empty content")
+	args = parser.parse_args()
+	email_send(args.header,args.content)	
+
