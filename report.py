@@ -92,7 +92,7 @@ def myAlign(string,length=0):
 		slen += 1
 	return ret
 
-def get_week_sum(book,time,db):
+def get_week_sum(time,db,book=""):
 	try:
 		title = "Total cost"
 		fields=["Total cost"]
@@ -100,7 +100,8 @@ def get_week_sum(book,time,db):
 		cursor = db.cursor()
 		cursor.execute(SQL_GET_WEEK_SUM)
 		row = cursor.fetchall()
-		write_excel(book,title,fields,row)
+		if book:
+			write_excel(book,title,fields,row)
 		if row[0][0]:
 			week_sum = float(row[0][0])
 		else:
@@ -110,6 +111,7 @@ def get_week_sum(book,time,db):
 	except Exception,Why:
 		print(Why)
 		exit(-1)
+	return week_sum
 
 def to_time_str(timestamp):
 	time_int = int(timestamp)
@@ -130,7 +132,7 @@ def sql_rows_to_time_str(rows,length,str_index):
 	return rows_ret
 			
 	
-def get_week_payment_items(book,time,user,db):
+def get_week_payment_items(time,user,db,book=""):
 	try:
 		SQL_GET_WEEK_SUM = ("select %s from payment join pri_type_tbl pr on pr.value=pri_type " 
 					"join sec_type_tbl se on se.value=sec_type "
@@ -143,7 +145,8 @@ def get_week_payment_items(book,time,user,db):
 #		rows_to_write = []
 		title = "Payment items"
 		fields = ["DATE","COST","COST NAME","PRIMARY TYPE","SECONDARY TYPE","PERIOD"]
-		write_excel(book,title,fields,rows_to_write)
+		if book:
+			write_excel(book,title,fields,rows_to_write)
 		print_title = "%sWEEK PAYMENT%s"%(67*'#',67*'#')
 		print_fields = "%-15s\t%-10s\t%-40s\t%-30s\t%-30s\t%-30s"%('DATE','COST','COST_NAME','PRIMATY TYPE','SECONDARY TYPE','PERIOD')
 		header = print_title + '\n' + print_fields+ '\n'+ HEADER
@@ -159,7 +162,7 @@ def get_week_payment_items(book,time,user,db):
 ##
 ##get most frequently pay sellers
 ##
-def get_most_freq_seller(book, time, user, db):
+def get_most_freq_seller(time, user, db,book=""):
 	try:
 		SQL_GET_FREQ_SELLER = "select %s from payment where user_id = %d and time > %d group by seller order by c desc limit 20"%(FREQ_SELLER_FIELDS,user,time)
 		title = "MOST FREQUENTLY SELLERS"
@@ -167,7 +170,8 @@ def get_most_freq_seller(book, time, user, db):
 		cursor = db.cursor()
 		cursor.execute(SQL_GET_FREQ_SELLER)
 		rows = cursor.fetchall()
-		write_excel(book,title,fields,rows)
+		if book:
+			write_excel(book,title,fields,rows)
 		print_title = "%sMOST FREQUENTLY SELLERS%s"%(60*'#',60*'#')
 		print_fields = "%-30s%-30s%-50s"%('frequency','cost','seller')
 		header = print_title + '\n' + print_fields + '\n' + HEADER
@@ -182,7 +186,7 @@ def get_most_freq_seller(book, time, user, db):
 ##
 ##get most frequently goods
 ##
-def get_most_freq_goods(f, time, user, db):
+def get_most_freq_goods(time, user, db,book=""):
 	try:
 		SQL_GET_FREQ_SELLER = "select %s from payment where user_id = %d and time > %d group by cost_name order by c desc limit 20"%(FREQ_GOODS_FIELDS,user,time)
 		title = "Most frequently goods"
@@ -190,7 +194,8 @@ def get_most_freq_goods(f, time, user, db):
 		cursor = db.cursor()
 		cursor.execute(SQL_GET_FREQ_SELLER)
 		rows = cursor.fetchall()
-		write_excel(book,title,fields,rows)
+		if book:
+			write_excel(book,title,fields,rows)
 		print_title = "%sMOST FREQUENTLY GOODS%s"%(60*'#',60*'#')
 		print_fields = "%-30s%-30s%-50s"%('FREQUENCY','COST','GOODS')
 		header = print_title + '\n' + print_fields + '\n' + HEADER
@@ -206,7 +211,7 @@ def get_most_freq_goods(f, time, user, db):
 ##
 ##get percentage of primary type of cost
 ##
-def get_pri_percent(f, time, user, db):
+def get_pri_percent(time, user, db,book=""):
 	try:
 		SQL_GET_PRI_PERCENT = "select round(a.sc * 100/b.tot,2),a.sc,a.de from (select sum(cost) sc,pr.description de from payment join pri_type_tbl pr on pr.value = pri_type where user_id = %d and time > %d group by pri_type order by sc desc) a,(select sum(cost) tot from payment where user_id = %d and time > %d) b"%(user,time,user,time)
 		title = "Primary type percentage"
@@ -214,7 +219,8 @@ def get_pri_percent(f, time, user, db):
 		cursor = db.cursor()
 		cursor.execute(SQL_GET_PRI_PERCENT)
 		rows = cursor.fetchall()
-		write_excel(book,title,fields,rows)
+		if book:
+			write_excel(book,title,fields,rows)
 		print_title = "%sPRIMARY TYPE PERCENTAGE%s"%(60*'#',60*'#')
 		print_fields = "%-20s%-20s%-40s"%('COST PERCENTAGE','COST','PRIMARY TYPE')
 		header = print_title + '\n' + print_fields + '\n' + HEADER
@@ -226,35 +232,35 @@ def get_pri_percent(f, time, user, db):
 	except Exception,Why:
 		print(Why)
 		exit(-1)
-	
+
 	
 def do_weekly_report(report_file, time, user, db):
-	get_week_sum(report_file,time,db)
-	get_week_payment_items(report_file, time, args.user, db)
-	get_most_freq_seller(report_file, time, args.user, db)
-	get_most_freq_goods(report_file, time, args.user, db)
-	get_pri_percent(report_file, time, args.user, db)
+	get_week_sum(time,db,report_file)
+	get_week_payment_items(time, args.user, db,report_file)
+	get_most_freq_seller(time, args.user, db,report_file)
+	get_most_freq_goods(time, args.user, db,report_file)
+	get_pri_percent(time, args.user, db,report_file)
 
 def do_monthly_report(report_file, time, user, db):
-	get_week_sum(report_file,time,db)
-	get_week_payment_items(report_file, time, args.user, db)
-	get_most_freq_seller(report_file, time, args.user, db)
-	get_most_freq_goods(report_file, time, args.user, db)
-	get_pri_percent(report_file, time, args.user, db)
+	get_week_sum(time,db,report_file)
+	get_week_payment_items(time, args.user, db,report_file)
+	get_most_freq_seller(time, args.user, db,report_file)
+	get_most_freq_goods(time, args.user, db,report_file)
+	get_pri_percent(time, args.user, db,report_file)
 
 def do_yearly_report(report_file, time, user, db):
-	get_week_sum(report_file,time,db)
-	get_week_payment_items(report_file, time, args.user, db)
-	get_most_freq_seller(report_file, time, args.user, db)
-	get_most_freq_goods(report_file, time, args.user, db)
-	get_pri_percent(report_file, time, args.user, db)
+	get_week_sum(time,db,report_file)
+	get_week_payment_items(time, args.user, db,report_file)
+	get_most_freq_seller(time, args.user, db,report_file)
+	get_most_freq_goods(time, args.user, db,report_file)
+	get_pri_percent(time, args.user, db,report_file)
 
 def do_totally_report(report_file, time, user, db):
-	get_week_sum(report_file,time,db)
-	get_week_payment_items(report_file, time, args.user, db)
-	get_most_freq_seller(report_file, time, args.user, db)
-	get_most_freq_goods(report_file, time, args.user, db)
-	get_pri_percent(report_file, time, args.user, db)
+	get_week_sum(time,db,report_file)
+	get_week_payment_items(time, args.user, db,report_file)
+	get_most_freq_seller(time, args.user, db,report_file)
+	get_most_freq_goods(time, args.user, db,report_file)
+	get_pri_percent(time, args.user, db,report_file)
 		
 	
 
@@ -265,6 +271,10 @@ if __name__=="__main__":
 	parser.add_argument("--user",type=int,default=1)
 	parser.add_argument("--mode",type=str,default="week")
 	args = parser.parse_args()
+	if args.mode == 'day':
+		time = args.time
+		do_report = do_daily_report
+		head = "Daily payment report"
 	if args.mode == 'week':
 		time = 	args.time - TIME_FORWARD_WEEK
 		do_report = do_weekly_report

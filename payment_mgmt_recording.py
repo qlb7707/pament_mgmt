@@ -2,8 +2,9 @@ import time
 import MySQLdb
 import re
 import argparse
+from utils import *
 
-INSERT_FORMAT = "insert into payment(cost,cost_name,seller,pri_type,sec_type,period,time) values(%f,'%s','%s',%u,%u,%u,%u)"
+INSERT_FORMAT = "insert into payment(cost,cost_name,seller,pri_type,sec_type,period,time,year,mon,day) values(%f,'%s','%s',%u,%u,%u,%u,%u,%u,%u)"
 payment_items = []
 
 def insert_record(cost,name,sel,pri,sec,period,time,db):
@@ -20,7 +21,7 @@ def insert_payment_items_to_db(db):
 	try:
 		cursor = db.cursor()
 		for item in payment_items:
-			SQL = INSERT_FORMAT %(item[0],item[1],item[2],item[3],item[4],item[5],item[6])
+			SQL = INSERT_FORMAT %(item[0],item[1],item[2],item[3],item[4],item[5],item[6],item[7],item[8],item[9])
 			cursor.execute(SQL)
 		db.commit()
 	except Exception,Why:
@@ -52,11 +53,12 @@ if __name__=='__main__':
 	else:
 		ti = int(time.time())
 	items = read_items(name)
+	y,m,d = parse_timestamp(ti)
 	for item in items:
 		print item
 		co,cn,sel,pr,se,pe = item
 		#insert_record(float(co),cn,sel,int(pr),int(se),int(pe),ti,db)
-		payment_items.append((float(co),cn,sel,int(pr),int(se),int(pe),ti))
+		payment_items.append((float(co),cn,sel,int(pr),int(se),int(pe),ti,y,m,d))
 	insert_payment_items_to_db(db)
 	db.close()
 
