@@ -8,10 +8,11 @@ concat = " and "
 where = " where "
 time_filter_b = "time >= %s "
 time_filter_t = "time <= %s "
-name_filter = "cost_name ='%s' "
-pri_filter = "pri_type_tbl.description = '%s'"
-sec_filter = "sec_type_tbl.description = '%s'"
-period_filter = "period_tbl.description = '%s'"
+name_filter = "cost_name like '%%%s%%' "
+pri_filter = "pri_type_tbl.description like '%%%s%%' "
+sec_filter = "sec_type_tbl.description like '%%%s%%' "
+period_filter = "period_tbl.description like '%%%s%%' "
+seller_filter = "seller like '%%%s%%' "
 
 
 
@@ -25,6 +26,7 @@ if __name__ == "__main__":
 	parser.add_argument("-p","--pri_type",type=str,default='',help="primary type description(name)")
 	parser.add_argument("-s","--sec_type",type=str,default='',help="secondary type description(name)")
 	parser.add_argument("-e","--period",type=str,default='',help="period description(name)")
+	parser.add_argument("-m","--merchant",type=str,default='',help="merchant(seller)")
 	args = parser.parse_args()
 	paras = ()
 	is_first = True
@@ -76,7 +78,16 @@ if __name__ == "__main__":
 		SQL = SQL + period_filter
 		paras = paras + (args.period,)
 
-	SQL_FINAL = SQL%paras
+	if args.merchant:
+		if not is_first:
+			SQL = SQL + concat
+		else:
+			is_first = False
+		SQL = SQL + seller_filter
+		paras = paras + (args.merchant,)
+
+
+	SQL_FINAL = SQL%paras + " order by time"
 	#print SQL_FINAL
 	sql_ret = os.popen('mysql -uroot -p123456 -h 127.0.0.1 payment_mgmt -e "%s";'%SQL_FINAL).read()
 	print sql_ret

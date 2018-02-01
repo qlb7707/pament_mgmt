@@ -6,13 +6,8 @@ import calendar as ca
 import myemail
 import xlwt
 
-TM_LOC = t.localtime()
-MON_DAY = ca.monthrange(TM_LOC.tm_year,TM_LOC.tm_mon)[1]
-TIME_FORWARD_WEEK = 86400 * 7
-TIME_FORWARD_MONTH = 86400 * MON_DAY
-TIME_FORWARD_YEAR = 86400 * (366 if ca.isleap(TM_LOC.tm_year) else  365) 
 
-ITEM_FIELDS = "time,cost,cost_name,pr.description,se.description,pe.description"
+ITEM_FIELDS = "time,cost,cost_name,seller,pr.description,se.description,pe.description"
 FREQ_SELLER_FIELDS = "count(*) c,sum(cost),seller"
 FREQ_GOODS_FIELDS = "count(*) c,sum(cost),cost_name"
 HEADER = 144*'-'
@@ -144,7 +139,7 @@ def get_week_payment_items(time,user,db,book=""):
 		rows_to_write = sql_rows_to_time_str(rows,6,0)
 #		rows_to_write = []
 		title = "Payment items"
-		fields = ["DATE","COST","COST NAME","PRIMARY TYPE","SECONDARY TYPE","PERIOD"]
+		fields = ["DATE","COST","COST NAME","SELLER","PRIMARY TYPE","SECONDARY TYPE","PERIOD"]
 		if book:
 			write_excel(book,title,fields,rows_to_write)
 		print_title = "%sWEEK PAYMENT%s"%(67*'#',67*'#')
@@ -152,7 +147,7 @@ def get_week_payment_items(time,user,db,book=""):
 		header = print_title + '\n' + print_fields+ '\n'+ HEADER
 		print header
 		for row in rows:
-			payment_item = "%-15s\t%-10s\t%-40s\t%-30s\t%-30s\t%-30s"%(to_time_str(row[0]),row[1],row[2],row[3],row[4],row[5])
+			payment_item = "%-15s\t%-10s\t%-40s\t%-30s\t%-30s\t%-30s"%(to_time_str(row[0]),row[1],row[2],row[4],row[5],row[6])
 			#rows_to_write.append((to_time_str(row[0]),row[1],row[2],row[3],row[4],row[5]))
 			print(payment_item)
 	except Exception,Why:
@@ -271,6 +266,11 @@ if __name__=="__main__":
 	parser.add_argument("--user",type=int,default=1)
 	parser.add_argument("--mode",type=str,default="week")
 	args = parser.parse_args()
+	TM_LOC = t.localtime(args.time)
+	MON_DAY = ca.monthrange(TM_LOC.tm_year,TM_LOC.tm_mon)[1]
+	TIME_FORWARD_WEEK = 86400 * 7
+	TIME_FORWARD_MONTH = 86400 * MON_DAY
+	TIME_FORWARD_YEAR = 86400 * (366 if ca.isleap(TM_LOC.tm_year) else  365) 
 	if args.mode == 'day':
 		time = args.time
 		do_report = do_daily_report
