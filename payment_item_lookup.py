@@ -1,9 +1,12 @@
 #!/bin/python
+#coding=utf-8
 import argparse
 import os
 from utils import *
 
 select_field = "year,mon,day,cost,cost_name,seller "
+sum_cost = "round(sum(cost),2) 合计 "
+item_count = "count(*) 条目数 "
 concat = " and "
 where = " where "
 time_filter_b = "time >= %s "
@@ -86,8 +89,11 @@ if __name__ == "__main__":
 		SQL = SQL + seller_filter
 		paras = paras + (args.merchant,)
 
-
+	SQL_SUM = SQL.replace(select_field,sum_cost)%paras
+	SQL_COUNT = SQL.replace(select_field,item_count)%paras
 	SQL_FINAL = SQL%paras + " order by time"
-	#print SQL_FINAL
+	#print SQL_SUM
 	sql_ret = os.popen('mysql -uroot -p123456 -h 127.0.0.1 payment_mgmt -e "%s";'%SQL_FINAL).read()
-	print sql_ret
+	sql_ret1 = os.popen('mysql -uroot -p123456 -h 127.0.0.1 payment_mgmt -e "%s";'%SQL_COUNT).read()
+	sql_ret2 = os.popen('mysql -uroot -p123456 -h 127.0.0.1 payment_mgmt -e "%s";'%SQL_SUM).read()
+	print sql_ret,sql_ret1,sql_ret2
