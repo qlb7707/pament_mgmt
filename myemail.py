@@ -12,7 +12,7 @@ passwd='xeizvcblorvgbffc'                                   #填入发送方邮�
 
 #passwd='aw18051220245'                                   #填入发送方邮箱的授权码
 #msg_to='lbqin@Hillstonenet.com'                                  #收件人邮箱
-msg_to=['qin_libin@foxmail.com','lbqin@Hillstonenet.com']                                  #收件人邮箱
+msg_to=['qin_libin@foxmail.com']                                  #收件人邮箱
 SMTP_SERVER = 'smtp.qq.com'
 SMTP_PORT = 465
                     
